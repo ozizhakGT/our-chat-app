@@ -6,6 +6,7 @@ import Input from "../../components/Input";
 import Button from "../../components/Button";
 import ErrorMessage from "../../components/ErrorMessage";
 import colors from "../../styles/colors";
+import {fadeInAnimationFromTop} from "../../styles/animations";
 
 const StyledHome = styled.div`
   position: fixed;
@@ -19,6 +20,7 @@ const StyledHome = styled.div`
   align-items: center;
   
   & > div:first-child {
+    opacity: 0;
     position: relative;
     background-color: ${colors.blue2};
     width: 40rem;
@@ -26,6 +28,7 @@ const StyledHome = styled.div`
     display: flex;
     flex-direction: column;
     border-radius: 9px;
+    animation: ${fadeInAnimationFromTop} .4s .2s forwards ease-in-out;
   }
   
   ${Button} {
@@ -43,7 +46,7 @@ const StyledHome = styled.div`
 `
 
 export default function Login() {
-  const {auth, setAuthUser} = useContext(AuthContext);
+  const {auth, login} = useContext(AuthContext);
   const [username, setUsername] = useState('');
   const [roomId, setRoomId] = useState(auth.roomId);
   const [isFormValid, setIsFormValid] = useState(true);
@@ -55,18 +58,14 @@ export default function Login() {
     }
   }, [auth.username]);
 
-  const login = () => {
+  const handleSubmit = () => {
     if (!username.trim() || !roomId.trim()) {
       setIsFormValid(false);
 
       return;
     }
 
-    setAuthUser({
-      ...auth,
-      username,
-      roomId
-    })
+    login({username, roomId});
   }
 
   return (
@@ -95,7 +94,7 @@ export default function Login() {
             type="text"/>
         </div>
         {!isFormValid && <ErrorMessage>All Fields Mandatory</ErrorMessage>}
-        <Button onClick={login}>Login</Button>
+        <Button onClick={handleSubmit}>Login</Button>
 
       </div>
     </StyledHome>

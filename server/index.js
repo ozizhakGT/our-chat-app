@@ -17,15 +17,22 @@ app.use(globalErrorHandler);
 
 io.on("connection", (socket) => {
 
-  const { roomId="lobby" } = socket.handshake.query;
+  const { roomId, username } = socket.handshake.query;
   socket.join(roomId);
 
   socket.on(newChatMessageEvent, (data) => {
-    io.in(roomId).emit(newChatMessageEvent, data);
+    const now = new Date();
+    const formatHour = now.toLocaleTimeString('en', {hour: '2-digit', minute:'2-digit'});
+
+    io.in(roomId).emit(newChatMessageEvent, {...data, username, formatHour});
   });
 
   socket.on("disconnect", () => {
     socket.leave(roomId);
+  });
+
+  socket.on("error", () => {
+    socket.emit("my error", "Failed Connecting!");
   });
 });
 

@@ -1,21 +1,21 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
+import { useHistory } from "react-router-dom";
 import socketIOClient from "socket.io-client";
 
 const NEW_CHAT_MESSAGE_EVENT = process.env.REACT_APP_NEW_MESSAGE_EVENT; // Name of the event
 const SOCKET_SERVER_URL = process.env.REACT_APP_SERVER_BASE_URL;
 
-const useChat = (roomId) => {
+const useChat = ({roomId, username}) => {
+  const { push } = useHistory();
   const [messages, setMessages] = useState([]); // Sent and received messages
+  const [isLogout, setIsLogout] = useState(false);
   const socketRef = useRef();
 
   useEffect(() => {
-
-    // Creates a WebSocket connection
     socketRef.current = socketIOClient(SOCKET_SERVER_URL, {
-      query: { roomId },
+      query: { roomId, username },
     });
 
-    // Listens for incoming messages
     socketRef.current.on(NEW_CHAT_MESSAGE_EVENT, (message) => {
       const incomingMessage = {
         ...message,
@@ -25,15 +25,18 @@ const useChat = (roomId) => {
       setMessages((messages) => [...messages, incomingMessage]);
     });
 
-    // Destroys the socket reference
-    // when the connection is closed
+    socketRef.current.on('my-error', text => alert(text));
+
+    socketRef.current.on('connect_error', err => {
+      setIsLogout(true);
+      alert("Cannot Connect, please try again later..");
+    })
+
     return () => {
       socketRef.current.disconnect();
     };
   }, [roomId]);
 
-  // Sends a message to the server that
-  // forwards it to all users in the same room
   const sendMessage = (messageBody) => {
     socketRef.current.emit(NEW_CHAT_MESSAGE_EVENT, {
       body: messageBody,
@@ -41,7 +44,7 @@ const useChat = (roomId) => {
     });
   };
 
-  return { messages, sendMessage };
+  return { messages, sendMessage, isLogout};
 };
 
 export default useChat;

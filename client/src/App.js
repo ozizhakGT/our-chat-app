@@ -22,6 +22,7 @@ const StyledApp = styled.div`
     justify-content: space-between;
     padding: 0 5rem;
     background-color: ${colors.blue2};
+    box-shadow: 0 5px 20px 5px rgba(0 0 0 / 15%);
     
     div {
       display: flex;
@@ -52,7 +53,9 @@ function App() {
 
   const logout = useCallback(() => {
     setAuthUser(initialState);
-  }, [])
+  }, []);
+
+  const login = useCallback(auth => setAuthUser(auth), [])
 
   return (
     <StyledApp>
@@ -67,13 +70,13 @@ function App() {
           <Button onClick={logout}>Logout</Button>
         </div>}
       </header>
-      <AuthContext.Provider value={{auth, setAuthUser}}>
+      <AuthContext.Provider value={{auth, login, logout}}>
         <BrowserRouter>
           <Switch>
-            <Route path='/' exact component={Login}/>
+            <Route path='/login' exact component={Login}/>
             <Route path='/chat/:roomId' exact component={Chat}/>
             <Route path="**">
-              <Redirect to={auth.username ? '/chat/:roomId' : '/'}/>
+              <Redirect to={auth.username ? '/chat/:roomId' : '/login'}/>
             </Route>
           </Switch>
         </BrowserRouter>
