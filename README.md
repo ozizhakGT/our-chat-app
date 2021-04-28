@@ -1,4 +1,4 @@
-# Getting Started with Lusha Gallery
+# Getting Started with Our EasyWay Chat
 
 ## Setup
 ### `Server`
